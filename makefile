@@ -286,7 +286,7 @@ $(OBJ_DIR)/%.o: $(LIB_DIR)/%.c
 	@echo ' '
 
 $(DBC_BUILD):
-	python2.7 "$(LIB_DBC_DIR)/dbc_parse.py" -i "$(LIB_DBC_DIR)/243.dbc" -s $(ENTITY) > $(DBC_BUILD)
+	python3 "$(LIB_DBC_DIR)/dbc_parse.py" -i "$(LIB_DBC_DIR)/243.dbc" -s $(ENTITY) > $(DBC_BUILD)
 
 $(DBC_DIR):
 	mkdir -p $(DBC_DIR)
@@ -305,9 +305,9 @@ clean:
 flash: build
 	bash -c "\
 	source $(SJBASE)/tools/Hyperload/modules/bin/activate && \
-	python2.7 $(SJBASE)/tools/Hyperload/hyperload.py -b 576000 -c 48000000 -a clocks -d $(SJDEV) $(BINARY)"
+	python3 $(SJBASE)/tools/Hyperload/hyperload.py -b 38400 -c 48000000 -a trigrams -d $(SJDEV) $(BINARY)"
 
 telemetry:
 	@bash -c "\
 	source $(SJBASE)/tools/Telemetry/modules/bin/activate && \
-	python2.7 $(SJBASE)/tools/Telemetry/telemetry.py"
+	python3 $(SJBASE)/tools/Telemetry/telemetry.py"

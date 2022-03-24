@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 #########
 # Utils #
 #########
@@ -24,7 +26,7 @@ OS=$(uname -s)
 # Get base path
 BASE=`pwd`
 # Define name of the arm version we are downloading
-ARM_GCC=gcc-arm-none-eabi-6-2017-q2-update
+ARM_GCC=gcc-arm-none-eabi-10-2020-q4-major-x86_64
 
 echo " ──────────────────────────────────────────────────┐"
 echo ""
@@ -64,11 +66,7 @@ case "$OS" in
 		echo " ───────────────────────────────────────────────────┐"
 		echo "         Updating Git, Python, PIP, and Curl         "
 		echo "└─────────────────────────────────────────────────── "
-		sudo apt -y install git python python-pip curl
-		echo " ───────────────────────────────────────────────────┐"
-		echo "                Installing OpenOCD                   "
-		echo "└─────────────────────────────────────────────────── "
-		sudo apt -y install openocd
+		sudo apt -y install git python3 python3-pip curl
 		echo " ──────────────────────────────────────────────────┐"
 		echo "      Adding current user to '$GROUP' group         "
 		echo "└────────────────────────────────────────────────── "
@@ -77,7 +75,7 @@ case "$OS" in
 		echo " ──────────────────────────────────────────────────┐"
 		echo "           Downloading gcc-arm-embedded             "
 		echo "└────────────────────────────────────────────────── "
-		curl -C - -LO https://developer.arm.com/-/media/Files/downloads/gnu-rm/6-2017q2/$ARM_GCC-linux.tar.bz2
+		curl -C - -LO https://developer.arm.com/-/media/Files/downloads/gnu-rm/10-2020q4/$ARM_GCC-linux.tar.bz2
 		GCC_PKG=$ARM_GCC-linux.tar.bz2
 		;;
 
@@ -118,11 +116,11 @@ cd $BASE
 echo " ───────────────────────────────────────────────────┐"
 echo "                   Upgrading PIP                     "
 echo "└─────────────────────────────────────────────────── "
-sudo -H python2.7 -m pip install --upgrade pip
+sudo -H python3 -m pip install --upgrade pip
 echo " ───────────────────────────────────────────────────┐"
 echo "            Upgrading Python's Virtualenv            "
 echo "└─────────────────────────────────────────────────── "
-sudo -H python2.7 -m pip install --upgrade virtualenv
+sudo -H python3 -m pip install --upgrade virtualenv
 echo " ───────────────────────────────────────────────────┐"
 echo "                Setting Up Hyperload                 "
 echo "└─────────────────────────────────────────────────── "
@@ -131,8 +129,8 @@ cd $BASE
 echo " ───────────────────────────────────────────────────┐"
 echo "                Setting Up Telemetry                 "
 echo "└─────────────────────────────────────────────────── "
-git clone --depth=1 https://github.com/kammce/Telemetry.git $TOOLDIR/Telemetry
-cd $TOOLDIR/Telemetry/ && ./setup
+# git clone --depth=1 https://github.com/SJSU-Dev2/Telemetry.git $TOOLDIR/Telemetry
+cd $TOOLDIR/Telemetry/ && ./setup-py3
 cd $BASE
 echo " ───────────────────────────────────────────────────┐"
 echo "          Generating Environment Variables           "
@@ -155,7 +153,7 @@ ENTITY=DBG
 
 # Compiler and library settings:
 # Selects compiler version to use
-PATH=\$PATH:\$SJBASE/tools/gcc-arm-none-eabi-6-2017-q2-update/bin
+PATH=\$PATH:\$SJBASE/tools/gcc-arm-none-eabi-10-2020-q4-major/bin
 SJLIBDIR="\$SJBASE/firmware/lib"
 
 # Export everything to the environment

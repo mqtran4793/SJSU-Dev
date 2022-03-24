@@ -13,7 +13,6 @@ import time
 import serial
 import serial.serialutil
 import serial.tools.list_ports as port_list
-from intelhex import IntelHex
 
 TOOL_NAME = 'pyFLASH - HYPERLOAD'
 TOOL_INFO = 'Flashing Tool for devices running the HYPERLOAD protocol'
@@ -82,7 +81,7 @@ else:
   logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 # Global Defines
-SPECIAL_CHAR = {'Dollar': b'$', 'OK': b'!', 'NextLine': b'\n', 'STAR': b'*'}
+SPECIAL_CHAR = {'DOLLAR': '$', 'OK': '!', 'NEXTLINE': '\n', 'STAR': '*', 'AT': '@'}
 HANDSHAKE_SEQUENCE = [
     0xFF,  # Signature of Hyperload
     0x55,  # Host -> Hyperload Request to flash device
@@ -91,17 +90,27 @@ HANDSHAKE_SEQUENCE = [
 
 ## Animation stuff
 ANIMATIONS = {
-    "circles": [0x25D0, 0x25D3, 0x25D1, 0x25D2],
-    "quadrants": [0x259F, 0x2599, 0x259B, 0x259C],
-    "trigrams": [0x2630, 0x2631, 0x2632, 0x2634],
-    "squarefills": [0x25E7, 0x25E9, 0x25E8, 0x25EA],
-    "spaces": [0x2008, 0x2008, 0x2008, 0x2008],
-    "clocks": [
-        0x1F55B, 0x1F550, 0x1F551, 0x1F552, 0x1F553, 0x1F554, 0x1F555, 0x1F556,
-        0x1F557, 0x1F558, 0x1F559, 0x1F55A
-    ],
-    "braille":
-    [0x2840, 0x2844, 0x2846, 0x2847, 0x2840, 0x28c7, 0x28e7, 0x28f7, 0x28fF],
+    "circles": [0x25D0, 0x25D3,
+                0x25D1, 0x25D2],
+    "quadrants": [0x259F, 0x2599,
+                  0x259B, 0x259C],
+    "trigrams": [0x2630, 0x2631,
+                 0x2632, 0x2634],
+    "squarefills": [0x25E7, 0x25E9,
+                    0x25E8, 0x25EA],
+    "spaces": [0x2008, 0x2008,
+               0x2008, 0x2008],
+    "clocks": [0x1F55B, 0x1F550,
+               0x1F551, 0x1F552,
+               0x1F553, 0x1F554,
+               0x1F555, 0x1F556,
+               0x1F557, 0x1F558,
+               0x1F559, 0x1F55A],
+    "braille": [0x2840, 0x2844,
+                0x2846, 0x2847,
+                0x2840, 0x28c7,
+                0x28e7, 0x28f7,
+                0x28fF],
 }
 
 VALID_SERIAL_PORT_DESCRIPTIONS = [
@@ -115,7 +124,7 @@ VALID_SERIAL_PORT_DESCRIPTIONS = [
 
 def getBoardParameters(description_string):
   # Parsing String to obtain required Board Parameters
-  board_parameters_list = description_string.replace("\n", "").split(b':')
+  board_parameters_list = description_string.replace("\n", "").split(':')
   board_parameters_dict = {
       'Board': board_parameters_list[0],
       'BlockSize': board_parameters_list[1],
@@ -141,16 +150,13 @@ def getBoardParameters(description_string):
 
 
 def getControlWord(baud_rate, cpu_speed):
-  logging.debug("Retrieving Control Word")
+  logging.debug("Retrieving control word")
   controlWord = ((cpu_speed / (baud_rate * 16)) - 1)
   return controlWord
 
 
 def getPageContent(binary, current_block, page_size):
-  start_offset = current_block * page_size
-  end_offset = (start_offset + page_size - 1)
   page_content = bytearray(page_size)
-
   for x in range(0, page_size):
     page_content[x] = binary[x + (current_block * page_size)]
 
@@ -165,7 +171,7 @@ def unichar(i):
   try:
     return chr(i)
   except ValueError:
-    return struct.pack('i', i).decode('utf-32')
+    return struct.pack('i', i).decode('utf-8')
 
 
 def reset_device(port):
@@ -279,20 +285,20 @@ def Hyperload2(binary_file_path, clockspeed, baud, selected_animation, device):
               parity=serial.PARITY_NONE,
               stopbits=serial.STOPBITS_ONE,
               bytesize=serial.EIGHTBITS,
-              timeout=3)
+              timeout=5)
 
           # Reset the device.
-          logging.info("Resetting Device: %s - %s" % (port_info.device,
+          logging.info("Resetting device: %s - %s" % (port_info.device,
                                                       port_info.description))
           reset_device(port)
           # Check if device emits a Hyperload signature after reset
           logging.info("Querying device: %s" % port_info.device)
           hyperload_signature = port_read_byte(port)
-          logging.info("hyperload_signature: %d" % hyperload_signature)
+          logging.info("Hyperload signature: %d" % hyperload_signature)
           # If it does, immediately break the loop. This will stop at the first
           # device with a hyperload response
           if hyperload_signature == HANDSHAKE_SEQUENCE[0]:
-            logging.info("Found Hyperload Device %s", port_info.device)
+            logging.info("Found Hyperload device %s", port_info.device)
             state = HyperloadStates.FlashRequest
             break
           else:
@@ -302,24 +308,24 @@ def Hyperload2(binary_file_path, clockspeed, baud, selected_animation, device):
         # devices that are not backed by a COM port will throw an exception
         # when attempting to open them.
         except serial.serialutil.SerialException:
-          logging.debug("Exception on port %s, desc: %s" %
+          logging.debug("Exception on port %s, description: %s" %
                         (port_info.name, port_info.description))
           continue
       # If the state hasn't changed then none of the ports found emitted a
       # Hyperload Signature, thus we should bail out.
       if state == HyperloadStates.FindPorts:
-        logging.error("Couldn't Find any Hyperload Devices")
+        logging.error("Couldn't find any Hyperload devices")
         state = HyperloadStates.BailOut
 
     if state == HyperloadStates.FlashRequest:
       port_write_and_verify(port, [HANDSHAKE_SEQUENCE[1]],
                             "Failed to send Hyperload flash request",
-                            "Sending Request to flash!")
+                            "Sending request to flash!")
 
       sj2_device_discovered = port_read_byte(port)
       if sj2_device_discovered == HANDSHAKE_SEQUENCE[2]:
         logging.debug("Received " + (str)(repr(sj2_device_discovered)) +
-                      ", Sending Control Word..")
+                      ", Sending control word..")
         state = HyperloadStates.SetBaudRates
 
     if state == HyperloadStates.SetBaudRates:
@@ -328,59 +334,55 @@ def Hyperload2(binary_file_path, clockspeed, baud, selected_animation, device):
 
       control_word = bytearray(struct.pack('<i', baud_rate_control_integer))
 
-      port_write_and_verify(port, control_word, "Sending control word failed",
-                            "Sending Control Word Successful!")
+      port_write_and_verify(port, control_word,
+                            "Sending control word failed",
+                            "Sending control word successful!")
 
       ackknowledge_byte = port_read_byte(port)
 
       if ackknowledge_byte != control_word[0]:
         logging.debug(control_word[0])
         logging.debug(ackknowledge_byte)
-        logging.error("Failed to receive Control Word Ack")
+        logging.error("Failed to receive control word ACK")
         state = HyperloadStates.BailOut
       else:
-        logging.debug("Ack from Hyperload received!")
+        logging.debug("ACK from Hyperload received!")
         port.baudrate = baud
         state = HyperloadStates.GetSystemInfo
 
     if state == HyperloadStates.GetSystemInfo:
-      # Read the CPU Desc String
-      start_of_cpu_description = port_read_byte(port)
-      if chr(start_of_cpu_description) != SPECIAL_CHAR['Dollar']:
-        logging.error("Failed to read CPU Description String")
+      # Read the CPU Desc Stringz
+      if chr(port_read_byte(port)) != SPECIAL_CHAR['DOLLAR']:
+        logging.error("Failed to read CPU description string")
         state = HyperloadStates.BailOut
       else:
-        logging.debug("Reading CPU Desc String...")
+        logging.debug("Reading CPU description string...")
 
-        board_description = SPECIAL_CHAR['Dollar'] + port.read_until(b'\n')
-        logging.debug("CPU Description String = %s", board_description)
+        board_description = port.read_until().decode('utf-8')
+        logging.debug("CPU description string = %s", board_description)
 
         board_parameters = getBoardParameters(board_description)
 
         # Receive OK from Hyperload
         if chr(port_read_byte(port)) != SPECIAL_CHAR['OK']:
-          logging.error("Failed to Receive OK")
+          logging.error("Failed to receive OK")
           state = HyperloadStates.BailOut
         else:
-          logging.debug("OK Received! Sending Block")
+          logging.debug("OK received! Sending block")
           state = HyperloadStates.PrepareBinaryForFlashing
 
     if state == HyperloadStates.PrepareBinaryForFlashing:
       # Sending Blocks of Binary File
-      total_blocks = (
-          len(application_binary) * 1.0 / int(board_parameters['BlockSize']))
-      logging.debug("Total Blocks = %f", total_blocks)
+      total_blocks = math.ceil((len(application_binary) * 1.0 / int(board_parameters['BlockSize'])))
+      logging.debug("Total blocks = %f", total_blocks)
 
-      paddingCount = len(application_binary) - (
-          (len(application_binary)) % int(board_parameters['BlockSize']))
-      logging.debug("Total Padding Count = %d", paddingCount)
-
-      total_blocks = math.ceil(total_blocks)
-      logging.info("Total # of Blocks to be Flashed = %d", total_blocks)
+      paddingCount = len(application_binary) - ((len(application_binary)) % int(board_parameters['BlockSize']))
+      logging.debug("Total padding count = %d", paddingCount)
 
       # Pad 0's to application_binary if required.
       application_binary = bytearray(application_binary)
       application_binary += (b'\x00' * paddingCount)
+      logging.info("Total # of blocks to be flashed = %d", total_blocks)
       state = HyperloadStates.TransmitApplicationToBoard
 
     if state == HyperloadStates.TransmitApplicationToBoard:
@@ -388,28 +390,25 @@ def Hyperload2(binary_file_path, clockspeed, baud, selected_animation, device):
 
       while current_block < total_blocks:
         # Send current block number to Hyperload
-        port_write_and_verify(port, struct.pack('>H', current_block),
-                              "Error in Sending BlockCount")
+        port_write_and_verify(port, struct.pack('>H', current_block), "Error in sending BlockCount")
+        logging.debug("Number of blocks = %d", current_block)
 
-        logging.debug("Number of Blocks = %d", current_block)
+        block_content = getPageContent(application_binary, current_block, int(board_parameters['BlockSize']))
 
-        block_content = getPageContent(application_binary, current_block,
-                                       int(board_parameters['BlockSize']))
-
-        port_write_and_verify(port, block_content,
-                              "Failed to sending Data Block Content")
-
-        logging.debug("Size of Block Written = %d", len(block_content))
+        port_write_and_verify(port, block_content, "Failed to sending data block content")
+        logging.debug("Size of block written = %d", len(block_content))
 
         checksum = getChecksum(block_content)
         logging.debug("Checksum = %d [0x%x]", checksum, checksum)
 
-        port_write_and_verify(port, [checksum],
-                              "Failed to send Entire Data Block")
-
-        if chr(port_read_byte(port)) != SPECIAL_CHAR['OK']:
-          logging.error(
-              "Failed to Receive Ack.. Retrying #%d\n" % int(current_block))
+        port_write_and_verify(port, [checksum], "Failed to send entire data block")
+        
+        
+        res = chr(port_read_byte(port))
+        if res == SPECIAL_CHAR['AT']:
+          logging.info("Flashing started!")
+        elif res != SPECIAL_CHAR['OK']:
+          logging.error("Failed to receive ACK.. Retrying #%d\n" % int(current_block))
         else:
           proress_bar(25, current_block, total_blocks)
           current_block = current_block + 1
@@ -417,25 +416,24 @@ def Hyperload2(binary_file_path, clockspeed, baud, selected_animation, device):
       if current_block != total_blocks:
         logging.error("Not all blocks were flashed")
         logging.error("Total = " + str(total_blocks))
-        logging.error("# of Blocks Flashed = " + str(current_block))
+        logging.error("# of blocks flashed = " + str(current_block))
         state = HyperloadStates.BailOut
       else:
         state = HyperloadStates.DetermineIfFlashWasSuccessful
 
     if state == HyperloadStates.DetermineIfFlashWasSuccessful:
       end_transfer = bytearray([0xFF, 0xFF])
-      port_write_and_verify(port, end_transfer,
-                            "Could not send end of transfer")
-      final_acknowledge = port_read_byte(port)
-
-      if chr(final_acknowledge) != SPECIAL_CHAR['STAR']:
-        logging.debug(final_acknowledge)
-        logging.error("Final Ack Not Received")
+      port_write_and_verify(port, end_transfer, "Could not send end of transfer")
+      # final_acknowledge = port_read_byte(port)
+      
+      # print(chr(final_acknowledge))
+      if chr(port_read_byte(port)) != SPECIAL_CHAR['STAR']:
+        # logging.debug(final_acknowledge)
+        logging.error("Final ACK not received")
       else:
-        port.baudrate = INITIAL_DEVICE_BAUD
-        logging.debug("Received Ack")
-        logging.info("\n\nFlashing Successful!")
-
+        # port.baudrate = INITIAL_DEVICE_BAUD
+        logging.debug("Received ACK")
+        logging.info("\n\nFlashing successful!")
       break
 
     if state == HyperloadStates.BailOut:

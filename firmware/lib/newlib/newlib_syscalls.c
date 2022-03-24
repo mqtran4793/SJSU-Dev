@@ -170,7 +170,7 @@ static int findslot_PARAMS(int);
 //
 //  Following is copied from libc/stdio/local.h to check std streams 
 //
-extern void _EXFUN (__sinit,( struct _reent *));
+extern void __sinit( struct _reent *);
 
 #define CHECK_INIT(ptr)            \
 do                                 \
