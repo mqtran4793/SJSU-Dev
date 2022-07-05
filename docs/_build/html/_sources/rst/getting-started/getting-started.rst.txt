@@ -69,7 +69,7 @@ Installation
 
 	.. note::
 		This will download and install the gcc-arm binaries, hyperload, telemetry locally to the repo.
-		It will also generate the environment variables file and link the makefile and environment file to
+		It will also generate the environment variables file and link the Makefile and environment file to
 		all of the default folders.
 
 **Step 3**

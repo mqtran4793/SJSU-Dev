@@ -3,13 +3,13 @@ Unit Testing
 
 Unit Testing Tools
 -------------------
-To unit test we support CGreens and Catch along with the FFF.h (fake function framework). CGreen must be installed globally your system for the makefile to work.
+To unit test we support CGreens and Catch along with the FFF.h (fake function framework). CGreen must be installed globally your system for the Makefile to work.
 
 Files in test folder
 ---------------------
 Within the test folder, there will be a folder named **simple-test** which contains the following:
 
-	* **makefile**: for building the tests
+	* **Makefile**: for building the tests
 	* **test.cpp**: a Catch unit test example.
 	* **cgreen-test.cpp**: is a CGreen test example.
 	* **test-files.list**: a new line delimited list of files to be included in your test.

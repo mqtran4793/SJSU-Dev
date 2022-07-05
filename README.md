@@ -62,7 +62,7 @@ See **[documentation](http://sjsu-dev.readthedocs.io/en/latest/?badge=latest)** 
 * Setup script now generates an environment script to set environment variables
 * Massive change to file hierarchy
 	* Firmware folders can be moved to any other location as long as it has a link to the development
-	* Default firmware folders come with a symbolic link to `env.sh` and `makefile`.
+	* Default firmware folders come with a symbolic link to `env.sh` and `Makefile`.
 	* There is no longer a defaults folder, application folders were moved to firmware folder.
 * Added unit testing frameworks cgreen and catch along with fff.h (fake function framework)
 

@@ -1,6 +1,6 @@
 # Allow settiing a project name from the environment, default to firmware.
 # Only affects the name of the generated binary.
-# TODO: Set this from the directory this makefile is stored in
+# TODO: Set this from the directory this Makefile is stored in
 PROJ 			?= firmware
 # Affects what DBC is generated for SJSUOne board
 ENTITY 			?= DBG

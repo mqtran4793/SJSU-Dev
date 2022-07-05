@@ -22,11 +22,11 @@ PROJECTS=(${SJBASE}/firmware/Starter ${SJBASE}/firmware/examples/*)
 for PROJECT in ${PROJECTS[@]}
 do
     echo "Creating link for: $PROJECT/env.sh"
-    echo "Creating link for: $PROJECT/makefile"
+    echo "Creating link for: $PROJECT/Makefile"
     # Place env.sh link into project folder
     rm -f "$PROJECT/env.sh"
     ln -s -f "${SJBASE}/env.sh" "$PROJECT/env.sh"
-    # # # # Place makefile link into project folder
-    rm -f "$PROJECT/makefile"
-    ln -s -f "${SJBASE}/makefile" "$PROJECT/makefile"
+    # # # # Place Makefile link into project folder
+    rm -f "$PROJECT/Makefile"
+    ln -s -f "${SJBASE}/Makefile" "$PROJECT/Makefile"
 done

@@ -9,7 +9,7 @@ Files in test folder
 ---------------------
 Within the test folder, there will be a folder named **simple-test** which contains the following:
 
-	* **makefile**: for building the tests
+	* **Makefile**: for building the tests
 	* **test.cpp**: a Catch unit test example.
 	* **cgreen-test.cpp**: is a CGreen test example.
 	* **test-files.list**: a new line delimited list of files to be included in your test.
