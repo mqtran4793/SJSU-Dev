@@ -129,8 +129,8 @@ cd $BASE
 echo " ───────────────────────────────────────────────────┐"
 echo "                Setting Up Telemetry                 "
 echo "└─────────────────────────────────────────────────── "
-# git clone --depth=1 https://github.com/SJSU-Dev2/Telemetry.git $TOOLDIR/Telemetry
-cd $TOOLDIR/Telemetry/ && ./setup-py3
+# git clone --depth=1 https://github.com/mqtran4793/Telemetry.git $TOOLDIR/Telemetry
+# cd $TOOLDIR/Telemetry/ && ./setup-py3
 cd $BASE
 echo " ───────────────────────────────────────────────────┐"
 echo "          Generating Environment Variables           "
